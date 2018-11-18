@@ -19,6 +19,7 @@ class BluetoothStateChangeReceiver(private val context: Context, private val log
                 BluetoothAdapter.STATE_ON -> logger.log("Bluetooth is on")
                 BluetoothAdapter.STATE_TURNING_OFF -> logger.log("Bluetooth is turning off")
                 BluetoothAdapter.STATE_OFF -> logger.log("Bluetooth is off")
+                else -> logger.log(state.toString())
             }
         }
     }
