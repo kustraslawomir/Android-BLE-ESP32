@@ -8,6 +8,8 @@ interface Logger {
      */
     fun log(tag: String, level: Level = Level.Verbose, message: String)
 
+    fun log(message: String)
+
     sealed class Level {
         object Info : Level()
         object Debug : Level()

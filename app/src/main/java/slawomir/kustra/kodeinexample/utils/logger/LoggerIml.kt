@@ -4,6 +4,10 @@ import android.util.Log
 
 class LoggerIml : Logger {
 
+    override fun log(message: String) {
+        log("logger: ", Logger.Level.Debug, message)
+    }
+
     override fun log(tag: String, level: Logger.Level, message: String) {
         when (level) {
             Logger.Level.Info -> Log.i(tag, message)
