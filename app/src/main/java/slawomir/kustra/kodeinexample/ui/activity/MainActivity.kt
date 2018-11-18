@@ -10,7 +10,6 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.closestKodein
 import org.kodein.di.generic.instance
 import slawomir.kustra.kodeinexample.R
-import slawomir.kustra.kodeinexample.data.model.Quote
 import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity(), KodeinAware {
@@ -26,15 +25,6 @@ class MainActivity : AppCompatActivity(), KodeinAware {
         val viewModel = ViewModelProviders.of(this, quotesViewModelFactory).get(QuotesViewModel::class.java)
 
         fab.setOnClickListener {
-            viewModel.addQuote(Quote("Some fancy quote", "Johny  Bravo"))
         }
-
-        viewModel.getQuotes().observe(this, Observer { quotes ->
-            val stringBuilder = StringBuilder()
-            quotes.forEach { quote ->
-                stringBuilder.append(quote.toString())
-            }
-            quotesTextView.text = stringBuilder.toString()
-        })
     }
 }
