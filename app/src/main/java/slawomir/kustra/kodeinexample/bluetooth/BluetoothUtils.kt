@@ -1,4 +1,4 @@
-package slawomir.kustra.kodeinexample.utils.bluetooth
+package slawomir.kustra.kodeinexample.bluetooth
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent

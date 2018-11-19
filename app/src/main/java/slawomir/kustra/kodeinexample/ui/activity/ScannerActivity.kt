@@ -2,6 +2,7 @@ package slawomir.kustra.kodeinexample.ui.activity
 
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
@@ -12,15 +13,15 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.closestKodein
 import org.kodein.di.generic.instance
 import slawomir.kustra.kodeinexample.R
+import slawomir.kustra.kodeinexample.bluetooth.BluetoothScanner
+import slawomir.kustra.kodeinexample.bluetooth.ScannerCallback
 import slawomir.kustra.kodeinexample.ui.activity.broadcasts.BluetoothStateChangeReceiver
 import slawomir.kustra.kodeinexample.ui.activity.vm.ScannerViewModel
 import slawomir.kustra.kodeinexample.ui.activity.vm.ScannerViewModelFactory
 import slawomir.kustra.kodeinexample.utils.Constants
 import slawomir.kustra.kodeinexample.utils.logger.Logger
-import kotlin.math.log
 
-class ScannerActivity : AppCompatActivity(), KodeinAware {
-
+class ScannerActivity : AppCompatActivity(), KodeinAware, ScannerCallback {
     override val kodein by closestKodein()
 
     private val logger by instance<Logger>()
@@ -35,6 +36,9 @@ class ScannerActivity : AppCompatActivity(), KodeinAware {
         val viewModel = ViewModelProviders.of(this, scannerViewModelFactory).get(ScannerViewModel::class.java)
 
         bluetoothStateChangeReceiver = BluetoothStateChangeReceiver(this, logger)
+
+        val scanner = BluetoothScanner(this, 5000, -75, this, logger)
+        scanner.startScanning()
 
         fab.setOnClickListener {
             logger.log("scanner", Logger.Level.Verbose, "fab clicked")
@@ -57,5 +61,14 @@ class ScannerActivity : AppCompatActivity(), KodeinAware {
     override fun onStop() {
         super.onStop()
         unregisterReceiver(bluetoothStateChangeReceiver)
+
+    }
+
+    override fun stopScanning() {
+
+    }
+
+    override fun addDevice(device: BluetoothDevice) {
+        logger.log("added new device!  ${device.name}")
     }
 }
