@@ -16,14 +16,14 @@ import org.kodein.di.android.closestKodein
 import org.kodein.di.generic.instance
 import slawomir.kustra.kodeinexample.R
 import slawomir.kustra.kodeinexample.bluetooth.BluetoothScanner
-import slawomir.kustra.kodeinexample.bluetooth.StopScannerCallback
 import slawomir.kustra.kodeinexample.ui.activity.broadcasts.BluetoothStateChangeReceiver
 import slawomir.kustra.kodeinexample.ui.activity.vm.ScannerViewModel
 import slawomir.kustra.kodeinexample.ui.activity.vm.ScannerViewModelFactory
 import slawomir.kustra.kodeinexample.utils.Constants
 import slawomir.kustra.kodeinexample.utils.logger.Logger
 
-class ScannerActivity : AppCompatActivity(), KodeinAware, StopScannerCallback {
+class ScannerActivity : AppCompatActivity(), KodeinAware {
+
     override val kodein by closestKodein()
 
     private val logger by instance<Logger>()
@@ -38,21 +38,16 @@ class ScannerActivity : AppCompatActivity(), KodeinAware, StopScannerCallback {
         ViewModelProviders.of(this, scannerViewModelFactory).get(ScannerViewModel::class.java)
 
         bluetoothStateChangeReceiver = BluetoothStateChangeReceiver(this, logger)
+        val scanner = BluetoothScanner(this, -75, logger)
 
-        val scanner = BluetoothScanner(this, -75, this, logger)
+        scanner.scanning.observe(this, Observer<Boolean> { scanning -> displayScanningState(scanning) })
 
-        scanner.scannedDevices.observe(this, Observer<HashMap<String, BluetoothDevice>> { map ->
-            val stringBuilder = StringBuilder()
+        scanner.scannedDevices.observe(
+            this,
+            Observer<HashMap<String, BluetoothDevice>> { map -> displayDevicesList(map) })
 
-            map.forEach { (key, value) ->
-                stringBuilder.append("Device name: $key\nDevice address: ${value.address}\n\n")
-            }
-            scannedDevices.text = stringBuilder.toString()
-        })
 
-        startScanning.setOnClickListener {
-            scanner.startScanning()
-        }
+        startScanning.setOnClickListener { scanner.startScanning() }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -71,10 +66,22 @@ class ScannerActivity : AppCompatActivity(), KodeinAware, StopScannerCallback {
     override fun onStop() {
         super.onStop()
         unregisterReceiver(bluetoothStateChangeReceiver)
-
     }
 
-    override fun stopScanning() {
+    private fun displayScanningState(scanning: Boolean) {
+        if (scanning)
+            scannedDevices.text = getString(R.string.scanning)
+        else scannedDevices.text = getString(R.string.start_scanning_by_pressing_the_button)
+    }
 
+    private fun displayDevicesList(map: HashMap<String, BluetoothDevice>?) {
+        if (map != null) {
+            val stringBuilder = StringBuilder()
+
+            map.forEach { (key, value) ->
+                stringBuilder.append("Device name: $key\nDevice address: ${value.address}\n\n")
+            }
+            scannedDevices.text = stringBuilder.toString()
+        }
     }
 }

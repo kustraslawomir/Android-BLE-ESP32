@@ -3,6 +3,6 @@ package slawomir.kustra.kodeinexample.utils
 class Constants {
     companion object {
         const val REQUEST_ENABLE_BT = 1
-        const val LENGTH_OF_SCANNER_LIFE = 2000L
+        const val LENGTH_OF_SCANNER_LIFE = 30000L
     }
 }
