@@ -1,4 +1,5 @@
 <resources>
-    <string name="app_name">KodeinExample</string>
+    <string name="app_name">BLE ESP320</string>
     <string name="action_settings">Settings</string>
+    <string name="start_scanning_by_pressing_the_button">Start scanning by pressing the button</string>
 </resources>

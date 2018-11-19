@@ -1,37 +1,57 @@
 package slawomir.kustra.kodeinexample.bluetooth
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanResult
+import slawomir.kustra.kodeinexample.utils.Constants.Companion.LENGTH_OF_SCANNER_LIFE
 import slawomir.kustra.kodeinexample.utils.logger.Logger
 
 
 class BluetoothScanner(
     private val activity: AppCompatActivity,
-    private val scanPeriod: Long,
-    private val signalStrength: Int,
-    private val scannerCallback: ScannerCallback,
+    private val minSignalStrength: Int,
+    private val stopScannerCallback: StopScannerCallback,
     private val logger: Logger
 ) {
+
     private val bluetoothAdapter: BluetoothAdapter
+
     private var scanning = false
 
-    private val mLeScanCallback = object : ScanCallback() {
+    internal var scannedDevices: MutableLiveData<HashMap<String, BluetoothDevice>> = MutableLiveData()
+
+    init {
+        val manager = activity.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        bluetoothAdapter = manager.adapter
+    }
+
+    private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
 
-            logger.log("found device with rssi: ${result.rssi}")
+            var devicesHashMap = scannedDevices.value
+            if (devicesHashMap == null)
+                devicesHashMap = hashMapOf()
 
-            if (result.rssi > signalStrength) {
-                scannerCallback.addDevice(result.device)
+            val signalStrength = result.rssi
+            val device = result.device
+
+            if (signalStrength > minSignalStrength) {
+                if (devicesHashMap.containsKey(device.name)) {
+                    devicesHashMap.remove(device.name)
+                }
+                devicesHashMap[device.name] = result.device
+                scannedDevices.value = devicesHashMap
             }
         }
 
@@ -46,19 +66,12 @@ class BluetoothScanner(
         }
     }
 
-    init {
-        val manager = activity.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothAdapter = manager.adapter
-    }
-
-    private fun isScanning() = scanning
-
     fun startScanning() {
         if (BluetoothUtils.checkBluetooth(bluetoothAdapter))
             scanDevices(true)
         else {
             BluetoothUtils.requestBluetooth(activity)
-            scannerCallback.stopScanning()
+            stopScannerCallback.stopScanning()
         }
     }
 
@@ -67,16 +80,22 @@ class BluetoothScanner(
 
         if (enable && !isScanning()) {
             GlobalScope.launch(Dispatchers.IO) {
-                delay(scanPeriod)
+                delay(LENGTH_OF_SCANNER_LIFE)
                 stopScanning(bluetoothLeScanner)
             }
-            scanning = true
-            bluetoothLeScanner.startScan(mLeScanCallback)
+            startScanning(bluetoothLeScanner)
         }
+    }
+
+    private fun startScanning(bluetoothLeScanner: BluetoothLeScanner) {
+        scanning = true
+        bluetoothLeScanner.startScan(scanCallback)
     }
 
     private fun stopScanning(bluetoothLeScanner: BluetoothLeScanner) {
         scanning = false
-        bluetoothLeScanner.stopScan(mLeScanCallback)
+        bluetoothLeScanner.stopScan(scanCallback)
     }
+
+    private fun isScanning() = scanning
 }

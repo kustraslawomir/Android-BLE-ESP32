@@ -7,21 +7,23 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_main.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.closestKodein
 import org.kodein.di.generic.instance
 import slawomir.kustra.kodeinexample.R
 import slawomir.kustra.kodeinexample.bluetooth.BluetoothScanner
-import slawomir.kustra.kodeinexample.bluetooth.ScannerCallback
+import slawomir.kustra.kodeinexample.bluetooth.StopScannerCallback
 import slawomir.kustra.kodeinexample.ui.activity.broadcasts.BluetoothStateChangeReceiver
 import slawomir.kustra.kodeinexample.ui.activity.vm.ScannerViewModel
 import slawomir.kustra.kodeinexample.ui.activity.vm.ScannerViewModelFactory
 import slawomir.kustra.kodeinexample.utils.Constants
 import slawomir.kustra.kodeinexample.utils.logger.Logger
 
-class ScannerActivity : AppCompatActivity(), KodeinAware, ScannerCallback {
+class ScannerActivity : AppCompatActivity(), KodeinAware, StopScannerCallback {
     override val kodein by closestKodein()
 
     private val logger by instance<Logger>()
@@ -33,15 +35,23 @@ class ScannerActivity : AppCompatActivity(), KodeinAware, ScannerCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val viewModel = ViewModelProviders.of(this, scannerViewModelFactory).get(ScannerViewModel::class.java)
+        ViewModelProviders.of(this, scannerViewModelFactory).get(ScannerViewModel::class.java)
 
         bluetoothStateChangeReceiver = BluetoothStateChangeReceiver(this, logger)
 
-        val scanner = BluetoothScanner(this, 5000, -75, this, logger)
-        scanner.startScanning()
+        val scanner = BluetoothScanner(this, -75, this, logger)
 
-        fab.setOnClickListener {
-            logger.log("scanner", Logger.Level.Verbose, "fab clicked")
+        scanner.scannedDevices.observe(this, Observer<HashMap<String, BluetoothDevice>> { map ->
+            val stringBuilder = StringBuilder()
+
+            map.forEach { (key, value) ->
+                stringBuilder.append("Device name: $key\nDevice address: ${value.address}\n\n")
+            }
+            scannedDevices.text = stringBuilder.toString()
+        })
+
+        startScanning.setOnClickListener {
+            scanner.startScanning()
         }
     }
 
@@ -66,9 +76,5 @@ class ScannerActivity : AppCompatActivity(), KodeinAware, ScannerCallback {
 
     override fun stopScanning() {
 
-    }
-
-    override fun addDevice(device: BluetoothDevice) {
-        logger.log("added new device!  ${device.name}")
     }
 }

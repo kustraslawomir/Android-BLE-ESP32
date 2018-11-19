@@ -10,7 +10,8 @@
         tools:context=".ui.activity.ScannerActivity">
 
     <TextView
-            android:id="@+id/quotesTextView"
+            android:id="@+id/scannedDevices"
+            android:text="@string/start_scanning_by_pressing_the_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
