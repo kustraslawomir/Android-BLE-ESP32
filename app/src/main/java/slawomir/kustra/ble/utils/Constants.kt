@@ -1,4 +1,4 @@
-package slawomir.kustra.kodeinexample.utils
+package slawomir.kustra.ble.utils
 
 class Constants {
     companion object {

@@ -1,4 +1,4 @@
-package slawomir.kustra.kodeinexample
+package slawomir.kustra.ble
 
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4

@@ -1,4 +1,4 @@
-package slawomir.kustra.kodeinexample
+package slawomir.kustra.ble
 
 import org.junit.Test
 

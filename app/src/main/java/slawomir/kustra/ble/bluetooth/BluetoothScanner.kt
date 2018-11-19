@@ -1,4 +1,4 @@
-package slawomir.kustra.kodeinexample.bluetooth
+package slawomir.kustra.ble.bluetooth
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -13,8 +13,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import slawomir.kustra.kodeinexample.utils.Constants.Companion.LENGTH_OF_SCANNER_LIFE
-import slawomir.kustra.kodeinexample.utils.logger.Logger
+import slawomir.kustra.ble.utils.Constants.Companion.LENGTH_OF_SCANNER_LIFE
+import slawomir.kustra.ble.utils.logger.Logger
 
 
 class BluetoothScanner(

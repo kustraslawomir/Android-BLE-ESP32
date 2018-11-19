@@ -1,4 +1,4 @@
-package slawomir.kustra.kodeinexample.ui.activity.vm
+package slawomir.kustra.ble.ui.activity.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

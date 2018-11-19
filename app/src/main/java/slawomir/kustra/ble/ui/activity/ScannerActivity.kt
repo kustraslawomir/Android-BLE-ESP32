@@ -1,4 +1,4 @@
-package slawomir.kustra.kodeinexample.ui.activity
+package slawomir.kustra.ble.ui.activity
 
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
@@ -14,13 +14,13 @@ import kotlinx.android.synthetic.main.content_main.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.closestKodein
 import org.kodein.di.generic.instance
-import slawomir.kustra.kodeinexample.R
-import slawomir.kustra.kodeinexample.bluetooth.BluetoothScanner
-import slawomir.kustra.kodeinexample.ui.activity.broadcasts.BluetoothStateChangeReceiver
-import slawomir.kustra.kodeinexample.ui.activity.vm.ScannerViewModel
-import slawomir.kustra.kodeinexample.ui.activity.vm.ScannerViewModelFactory
-import slawomir.kustra.kodeinexample.utils.Constants
-import slawomir.kustra.kodeinexample.utils.logger.Logger
+import slawomir.kustra.ble.R
+import slawomir.kustra.ble.bluetooth.BluetoothScanner
+import slawomir.kustra.ble.ui.activity.broadcasts.BluetoothStateChangeReceiver
+import slawomir.kustra.ble.ui.activity.vm.ScannerViewModel
+import slawomir.kustra.ble.ui.activity.vm.ScannerViewModelFactory
+import slawomir.kustra.ble.utils.Constants
+import slawomir.kustra.ble.utils.logger.Logger
 
 class ScannerActivity : AppCompatActivity(), KodeinAware {
 
@@ -45,7 +45,6 @@ class ScannerActivity : AppCompatActivity(), KodeinAware {
         scanner.scannedDevices.observe(
             this,
             Observer<HashMap<String, BluetoothDevice>> { map -> displayDevicesList(map) })
-
 
         startScanning.setOnClickListener { scanner.startScanning() }
     }

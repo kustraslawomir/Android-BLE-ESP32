@@ -1,14 +1,14 @@
-package slawomir.kustra.kodeinexample.di.modules
+package slawomir.kustra.ble.di.modules
 
 import android.content.Context
 import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.provider
 import org.kodein.di.generic.singleton
-import slawomir.kustra.kodeinexample.ui.activity.vm.ScannerViewModel
-import slawomir.kustra.kodeinexample.ui.activity.vm.ScannerViewModelFactory
-import slawomir.kustra.kodeinexample.utils.logger.Logger
-import slawomir.kustra.kodeinexample.utils.logger.LoggerIml
+import slawomir.kustra.ble.ui.activity.vm.ScannerViewModel
+import slawomir.kustra.ble.ui.activity.vm.ScannerViewModelFactory
+import slawomir.kustra.ble.utils.logger.Logger
+import slawomir.kustra.ble.utils.logger.LoggerIml
 
 /*
 Binding

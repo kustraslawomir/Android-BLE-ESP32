@@ -1,11 +1,11 @@
-package slawomir.kustra.kodeinexample
+package slawomir.kustra.ble
 
 import android.app.Application
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
-import slawomir.kustra.kodeinexample.di.modules.appModule
-import slawomir.kustra.kodeinexample.utils.logger.Logger
+import slawomir.kustra.ble.di.modules.appModule
+import slawomir.kustra.ble.utils.logger.Logger
 
 class BluetoothScannerApplication : Application(), KodeinAware {
 

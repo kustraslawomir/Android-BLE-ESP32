@@ -1,10 +1,10 @@
-package slawomir.kustra.kodeinexample.ui.activity.broadcasts
+package slawomir.kustra.ble.ui.activity.broadcasts
 
 import android.bluetooth.BluetoothAdapter
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import slawomir.kustra.kodeinexample.utils.logger.Logger
+import slawomir.kustra.ble.utils.logger.Logger
 
 class BluetoothStateChangeReceiver(private val context: Context, private val logger: Logger) : BroadcastReceiver() {
 

@@ -1,9 +1,9 @@
-package slawomir.kustra.kodeinexample.bluetooth
+package slawomir.kustra.ble.bluetooth
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
-import slawomir.kustra.kodeinexample.utils.Constants
+import slawomir.kustra.ble.utils.Constants
 
 class BluetoothUtils {
 

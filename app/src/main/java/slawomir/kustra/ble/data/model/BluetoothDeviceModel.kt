@@ -1,4 +1,4 @@
-package slawomir.kustra.kodeinexample.data.model
+package slawomir.kustra.ble.data.model
 
 import android.bluetooth.BluetoothDevice
 

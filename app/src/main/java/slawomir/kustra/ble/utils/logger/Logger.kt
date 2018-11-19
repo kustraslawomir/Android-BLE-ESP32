@@ -1,4 +1,4 @@
-package slawomir.kustra.kodeinexample.utils.logger
+package slawomir.kustra.ble.utils.logger
 
 interface Logger {
 
