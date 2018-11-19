@@ -24,13 +24,10 @@ import slawomir.kustra.ble.utils.logger.Logger
 
 class ScannerActivity : AppCompatActivity(), KodeinAware {
 
-    override val kodein by closestKodein()
-
     private val logger by instance<Logger>()
+    private val scannerViewModelFactory: ScannerViewModelFactory by instance()
 
     private lateinit var bluetoothStateChangeReceiver: BluetoothStateChangeReceiver
-
-    private val scannerViewModelFactory: ScannerViewModelFactory by instance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +45,8 @@ class ScannerActivity : AppCompatActivity(), KodeinAware {
 
         startScanning.setOnClickListener { scanner.startScanning() }
     }
+
+    override val kodein by closestKodein()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == Constants.REQUEST_ENABLE_BT && resultCode == Activity.RESULT_OK) {
@@ -73,14 +72,9 @@ class ScannerActivity : AppCompatActivity(), KodeinAware {
         else scannedDevices.text = getString(R.string.start_scanning_by_pressing_the_button)
     }
 
-    private fun displayDevicesList(map: HashMap<String, BluetoothDevice>?) {
-        if (map != null) {
-            val stringBuilder = StringBuilder()
-
-            map.forEach { (key, value) ->
-                stringBuilder.append("Device name: $key\nDevice address: ${value.address}\n\n")
-            }
-            scannedDevices.text = stringBuilder.toString()
-        }
+    private fun displayDevicesList(map: HashMap<String, BluetoothDevice>) {
+        val stringBuilder = StringBuilder()
+        map.forEach { (key, value) -> stringBuilder.append("Device name: $key\nDevice address: ${value.address}\n\n") }
+        scannedDevices.text = stringBuilder.toString()
     }
 }
