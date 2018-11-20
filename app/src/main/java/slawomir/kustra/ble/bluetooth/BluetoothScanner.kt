@@ -14,16 +14,17 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import slawomir.kustra.ble.utils.Constants.Companion.LENGTH_OF_SCANNER_LIFE
-import slawomir.kustra.ble.utils.logger.Logger
-
 
 class BluetoothScanner(
     private val activity: AppCompatActivity,
-    private val minSignalStrength: Int,
-    private val logger: Logger
-) {
+    private val minSignalStrength: Int) {
 
+    /*
+    Bluetooth adapter represents BT 'radio'
+     */
     private val bluetoothAdapter: BluetoothAdapter
+
+    private var bluetoothLeScanner: BluetoothLeScanner? = null
 
     internal var scannedDevices: MutableLiveData<HashMap<String, BluetoothDevice>> = MutableLiveData()
     internal var scanning: MutableLiveData<Boolean> = MutableLiveData()
@@ -52,42 +53,41 @@ class BluetoothScanner(
 
         override fun onBatchScanResults(results: List<ScanResult>) {
             super.onBatchScanResults(results)
-            logger.log("onBatchScanResults size: ${results.size}")
         }
 
         override fun onScanFailed(errorCode: Int) {
             super.onScanFailed(errorCode)
-            logger.log("onScanFailed: $errorCode")
         }
     }
 
-    fun startScanning() {
+    fun initializeScanning() {
         if (BluetoothUtils.checkBluetooth(bluetoothAdapter))
             scanDevices(true)
         else
             BluetoothUtils.requestBluetooth(activity)
     }
 
+
     private fun scanDevices(enable: Boolean) {
-        val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
 
         if (enable && !isScanning()) {
             GlobalScope.launch(Dispatchers.Main) {
                 delay(LENGTH_OF_SCANNER_LIFE)
-                stopScanning(bluetoothLeScanner)
+                stopScanning()
             }
-            startScanning(bluetoothLeScanner)
+            startScanning()
         }
     }
 
-    private fun startScanning(bluetoothLeScanner: BluetoothLeScanner) {
+    private fun startScanning() {
         scanning.value = true
-        bluetoothLeScanner.startScan(scanCallback)
+        bluetoothLeScanner?.startScan(scanCallback)
     }
 
-    private fun stopScanning(bluetoothLeScanner: BluetoothLeScanner) {
+    internal fun stopScanning() {
         scanning.value = false
-        bluetoothLeScanner.stopScan(scanCallback)
+        bluetoothLeScanner?.stopScan(scanCallback)
     }
 
     private fun isScanning() = scanning.value ?: false
