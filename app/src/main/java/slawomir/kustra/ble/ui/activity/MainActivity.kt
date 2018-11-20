@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.closestKodein
@@ -14,7 +15,7 @@ import slawomir.kustra.ble.R
 import slawomir.kustra.ble.ui.activity.broadcasts.BluetoothStateChangeReceiver
 import slawomir.kustra.ble.ui.activity.vm.ScannerViewModel
 import slawomir.kustra.ble.ui.activity.vm.ScannerViewModelFactory
-import slawomir.kustra.ble.ui.lampscanner.LampScannerFragment
+import slawomir.kustra.ble.ui.fragments.devicescanner.DeviceScannerFragment
 import slawomir.kustra.ble.utils.Constants
 import slawomir.kustra.ble.utils.logger.Logger
 
@@ -34,7 +35,7 @@ class MainActivity : AppCompatActivity(), KodeinAware {
 
         bluetoothStateChangeReceiver = BluetoothStateChangeReceiver(this, logger)
 
-        setSplashFragment()
+        replaceFragment(DeviceScannerFragment())
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -55,9 +56,9 @@ class MainActivity : AppCompatActivity(), KodeinAware {
         unregisterReceiver(bluetoothStateChangeReceiver)
     }
 
-    private fun setSplashFragment() {
-        val tx = supportFragmentManager.beginTransaction()
-        tx.replace(R.id.fragmentContainer, LampScannerFragment())
-        tx.commit()
+    internal fun replaceFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .commit()
     }
 }

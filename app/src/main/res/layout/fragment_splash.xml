@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:gravity="center"
-              android:background="@color/colorPrimary"
-              android:layout_height="match_parent">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:gravity="center"
+             android:background="@color/colorPrimary"
+             android:layout_height="match_parent">
 
     <ImageView
             android:layout_gravity="center"
-            android:src="@drawable/ic_lamp"
-            android:layout_width="110dp"
-            android:layout_height="200dp"/>
+            android:padding="100dp"
+            android:src="@drawable/ic_scanning"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
     <TextView
+            android:alpha="0.7"
+            android:paddingBottom="30dp"
+            android:layout_gravity="bottom|center"
             android:id="@+id/scanningTextView"
             android:textSize="16sp"
             android:textColor="@color/white"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-</LinearLayout>
+</FrameLayout>
