@@ -1,5 +1,7 @@
 package slawomir.kustra.ble.utils
 
+import java.util.*
+
 class Constants {
     companion object {
         const val REQUEST_ENABLE_BT = 1

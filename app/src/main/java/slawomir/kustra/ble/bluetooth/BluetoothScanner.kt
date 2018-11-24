@@ -13,11 +13,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.kodein.di.Kodein
+import org.kodein.di.generic.instance
 import slawomir.kustra.ble.utils.Constants.Companion.LENGTH_OF_SCANNER_LIFE
+import slawomir.kustra.ble.utils.logger.Logger
 
 class BluetoothScanner(
+    kodein: Kodein,
     private val activity: AppCompatActivity,
-    private val minSignalStrength: Int) {
+    private val minSignalStrength: Int
+) {
+
+    private val logger: Logger by kodein.instance()
 
     /*
     Bluetooth adapter represents BT 'radio'
@@ -49,14 +56,18 @@ class BluetoothScanner(
                 devicesHashMap[device.name] = result.device
                 scannedDevices.value = devicesHashMap
             }
+
+            logger.log("onScanResult -> ", result)
         }
 
         override fun onBatchScanResults(results: List<ScanResult>) {
             super.onBatchScanResults(results)
+            logger.log("onBatchScanResults -> ", results)
         }
 
         override fun onScanFailed(errorCode: Int) {
             super.onScanFailed(errorCode)
+            logger.log("onScanFailed errorCode -> ", errorCode)
         }
     }
 
@@ -81,11 +92,13 @@ class BluetoothScanner(
     }
 
     private fun startScanning() {
+        logger.log("startScanning")
         scanning.value = true
         bluetoothLeScanner?.startScan(scanCallback)
     }
 
     internal fun stopScanning() {
+        logger.log("stopScanning")
         scanning.value = false
         bluetoothLeScanner?.stopScan(scanCallback)
     }

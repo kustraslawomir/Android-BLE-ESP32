@@ -10,6 +10,9 @@ interface Logger {
 
     fun log(message: String)
 
+    fun log(message: String, value: Any
+    )
+
     sealed class Level {
         object Info : Level()
         object Debug : Level()

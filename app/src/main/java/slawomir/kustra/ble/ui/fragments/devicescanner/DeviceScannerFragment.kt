@@ -31,7 +31,7 @@ class DeviceScannerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val scanner = BluetoothScanner(activity, -75)
+        val scanner = BluetoothScanner(activity.kodein, activity, -75)
 
         scanner.scanning.observe(this, Observer<Boolean> { scanning ->
             if (scanning)
