@@ -7,6 +7,8 @@ import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
+import android.content.Intent
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
 import org.kodein.di.generic.instance
+import slawomir.kustra.ble.utils.Constants.Companion.LAMP
 import slawomir.kustra.ble.utils.Constants.Companion.LENGTH_OF_SCANNER_LIFE
 import slawomir.kustra.ble.utils.logger.Logger
 
@@ -104,4 +107,18 @@ class BluetoothScanner(
     }
 
     private fun isScanning() = scanning.value ?: false
+    fun shouldCreateNewPair(): Boolean {
+        var shouldCreateNewPair = true
+
+        val pairedDevices = bluetoothAdapter.bondedDevices
+        if (pairedDevices.size > 0) {
+            pairedDevices.forEach { device ->
+                run {
+                    if (device.name == LAMP)
+                        shouldCreateNewPair = false
+                }
+            }
+        }
+        return shouldCreateNewPair
+    }
 }

@@ -4,4 +4,5 @@
     <string name="scanning">Looking for your device</string>
     <string name="scanning_success">Device found!</string>
     <string name="scanning_error">Error</string>
+    <string name="light_led">Light led</string>
 </resources>

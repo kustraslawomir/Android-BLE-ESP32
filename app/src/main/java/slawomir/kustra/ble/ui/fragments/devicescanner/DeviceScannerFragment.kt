@@ -1,18 +1,19 @@
 package slawomir.kustra.ble.ui.fragments.devicescanner
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothDevice.*
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.fragment_splash.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import slawomir.kustra.ble.R
 import slawomir.kustra.ble.bluetooth.BluetoothScanner
 import slawomir.kustra.ble.model.ScanningResults
@@ -24,14 +25,17 @@ import slawomir.kustra.ble.utils.Constants.Companion.LAMP
 class DeviceScannerFragment : Fragment() {
 
     lateinit var activity: MainActivity
+    private var lampDevice: BluetoothDevice? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_splash, container, false)
 
+    private lateinit var scanner: BluetoothScanner
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val scanner = BluetoothScanner(activity.kodein, activity, -75)
+        scanner = BluetoothScanner(activity.kodein, activity, -75)
 
         scanner.scanning.observe(this, Observer<Boolean> { scanning ->
             if (scanning)
@@ -43,6 +47,9 @@ class DeviceScannerFragment : Fragment() {
             Observer<HashMap<String, BluetoothDevice>> { map -> mapDevicesList(map, scanner) })
 
         scanner.initializeScanning()
+
+        val intent = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        activity.registerReceiver(mPairReceiver, intent)
     }
 
     override fun onAttach(context: Context?) {
@@ -55,16 +62,25 @@ class DeviceScannerFragment : Fragment() {
         scanner: BluetoothScanner
     ) {
         map.forEach { (key, value) ->
-            if (key == LAMP) {
-                scanner.stopScanning()
-                displayScanningState(ScanningResults.ScanningSuccess)
-                GlobalScope.launch(Dispatchers.Main)
-                {
-                    delay(1000)
-                    openDeviceDetailsScreen(value)
+            when (key) {
+                LAMP -> {
+                    this.lampDevice = value
+                    scanner.stopScanning()
+                    pairDevice(value)
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        scanner.stopScanning()
+        super.onDestroy()
+    }
+
+    private fun pairDevice(device: BluetoothDevice) {
+        if (scanner.shouldCreateNewPair())
+            createBond(device)
+        else openDeviceDetailsScreen(device)
     }
 
     private fun openDeviceDetailsScreen(device: BluetoothDevice) {
@@ -81,5 +97,35 @@ class DeviceScannerFragment : Fragment() {
             ScanningResults.ScanningSuccess -> scanningTextView.text = getString(R.string.scanning_success)
             ScanningResults.ScanningError -> scanningTextView.text = getString(R.string.scanning_error)
         }
+    }
+
+    private val mPairReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+            if (BluetoothDevice.ACTION_BOND_STATE_CHANGED == action) {
+
+                val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR)
+                val prevState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR)
+
+                when (state) {
+                    BOND_BONDED -> {
+                        if (prevState == BOND_BONDING) {
+                            lampDevice?.let { openDeviceDetailsScreen(it) }
+                        }
+                    }
+                    BOND_NONE -> {
+                        if (prevState == BluetoothDevice.BOND_BONDED) {
+                            Toast.makeText(context, "Unpaired", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun createBond(btDevice: BluetoothDevice): Boolean {
+        val class1 = Class.forName("android.bluetooth.BluetoothDevice")
+        val createBondMethod = class1.getMethod("createBond")
+        return createBondMethod.invoke(btDevice) as Boolean
     }
 }
