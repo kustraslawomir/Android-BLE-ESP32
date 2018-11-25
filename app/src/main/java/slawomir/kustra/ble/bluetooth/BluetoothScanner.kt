@@ -20,6 +20,7 @@ import org.kodein.di.generic.instance
 import slawomir.kustra.ble.utils.Constants.Companion.LAMP
 import slawomir.kustra.ble.utils.Constants.Companion.LENGTH_OF_SCANNER_LIFE
 import slawomir.kustra.ble.utils.logger.Logger
+import timber.log.Timber
 
 class BluetoothScanner(
     kodein: Kodein,
@@ -113,6 +114,7 @@ class BluetoothScanner(
                 run {
                     if (device.name == LAMP)
                         shouldCreateNewPair = false
+                    else Timber.e("NOT ESP LAMP")
                 }
             }
         }

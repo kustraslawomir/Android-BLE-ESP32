@@ -73,6 +73,7 @@ class DeviceScannerFragment : Fragment() {
         scanner: BluetoothScanner
     ) {
         map.forEach { (key, value) ->
+            Timber.e("key: %s", key)
             when (key) {
                 LAMP -> {
                     this.lampDevice = value
@@ -120,11 +121,7 @@ class DeviceScannerFragment : Fragment() {
                 val prevState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR)
 
                 when (state) {
-                    BOND_BONDED -> {
-                        if (prevState == BOND_BONDING) {
-                            lampDevice?.let { openDeviceDetailsScreen(it) }
-                        }
-                    }
+                    BOND_BONDED -> { lampDevice?.let { openDeviceDetailsScreen(it) } }
                     BOND_NONE -> {
                         if (prevState == BluetoothDevice.BOND_BONDED) {
                             Toast.makeText(context, "Unpaired", Toast.LENGTH_LONG).show()
