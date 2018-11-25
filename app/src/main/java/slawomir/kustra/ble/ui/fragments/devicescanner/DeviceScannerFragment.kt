@@ -73,7 +73,7 @@ class DeviceScannerFragment : Fragment() {
         scanner: BluetoothScanner
     ) {
         map.forEach { (key, value) ->
-            Timber.e("key: %s", key)
+            Timber.e("key: %s", key == LAMP)
             when (key) {
                 LAMP -> {
                     this.lampDevice = value
