@@ -18,6 +18,7 @@ import slawomir.kustra.ble.ui.activity.vm.ScannerViewModelFactory
 import slawomir.kustra.ble.ui.fragments.devicescanner.DeviceScannerFragment
 import slawomir.kustra.ble.utils.Constants
 import slawomir.kustra.ble.utils.logger.Logger
+import timber.log.Timber
 
 
 class MainActivity : AppCompatActivity(), KodeinAware {

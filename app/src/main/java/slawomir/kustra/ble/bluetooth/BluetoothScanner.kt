@@ -29,9 +29,6 @@ class BluetoothScanner(
 
     private val logger: Logger by kodein.instance()
 
-    /*
-    Bluetooth adapter represents BT 'radio'
-     */
     private val bluetoothAdapter: BluetoothAdapter
 
     private var bluetoothLeScanner: BluetoothLeScanner? = null

@@ -7,21 +7,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.google.gson.Gson
 import kotlinx.android.synthetic.main.fragment_device_details.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import slawomir.kustra.ble.R
 import slawomir.kustra.ble.ui.activity.MainActivity
 import slawomir.kustra.ble.utils.Constants
-import timber.log.Timber
 import slawomir.kustra.ble.utils.Constants.Companion.ESP_UUID
+import timber.log.Timber
 import java.io.IOException
 import java.io.OutputStream
 import java.util.*
-import android.bluetooth.BluetoothSocket
-import android.bluetooth.BluetoothDevice
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
-
 
 class DeviceDetailsFragment : Fragment() {
 
@@ -37,9 +35,11 @@ class DeviceDetailsFragment : Fragment() {
 
         val bluetoothDevice = arguments?.getParcelable<BluetoothDevice>(Constants.DEVICE)
         if (bluetoothDevice != null) {
-            connectDevice(bluetoothDevice)
+            GlobalScope.launch(Dispatchers.IO) {
+                delay(500)
+                connectDevice(bluetoothDevice)
+            }
         }
-
         ledLight.setOnCheckedChangeListener { _, checked ->
             changeLedState(checked)
         }
@@ -51,8 +51,6 @@ class DeviceDetailsFragment : Fragment() {
     }
 
     private fun connectDevice(bluetoothDevice: BluetoothDevice) {
-        Timber.e("try to connect device with uuid: %s", Gson().toJson(bluetoothDevice.uuids))
-
         val manager = activity.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter = manager.adapter
 
@@ -112,10 +110,6 @@ class DeviceDetailsFragment : Fragment() {
 
     private fun createSocketListener(connectedDevice: BluetoothDevice) {
         Timber.e("createSocketListener")
-        val socket = connectedDevice.javaClass.getMethod("createRfcommSocket", Int::class.java).invoke(
-            connectedDevice,
-            2
-        ) as BluetoothSocket
 
         val tmp = createBluetoothSocket(connectedDevice)
         val clazz = tmp.remoteDevice::class.java
@@ -126,50 +120,23 @@ class DeviceDetailsFragment : Fragment() {
 
         val fallbackSocket = m.invoke(tmp.remoteDevice, *params) as BluetoothSocket
 
-        if (fallbackSocket != null) {
-            try {
-                Timber.e("connect socket")
-                fallbackSocket.connect()
-            } catch (e: IOException) {
-                fallbackSocket.close()
-                Timber.e("socket connection error: %s", e.message)
-            }
+        try {
+            Timber.e("connect socket")
+            fallbackSocket.connect()
+        } catch (e: IOException) {
+            fallbackSocket.close()
+            Timber.e("socket connection error: %s", e.message)
+        }
 
-            try {
-                espOutStream = fallbackSocket.outputStream
-            } catch (e: IOException) {
-                Timber.e("out stream error: %s", e.message)
-            }
+        try {
+            espOutStream = fallbackSocket.outputStream
+        } catch (e: IOException) {
+            Timber.e("out stream error: %s", e.message)
         }
     }
 
     private fun createBluetoothSocket(connectedDevice: BluetoothDevice): BluetoothSocket =
         connectedDevice.createRfcommSocketToServiceRecord(UUID.fromString(ESP_UUID))
-
-
-    private fun createSocket(device: BluetoothDevice, secure: Boolean): BluetoothSocket? {
-        try {
-            return createBluetoothSocket(device)
-        } catch (e: IOException) {
-            try {
-                val method: Method = if (secure) {
-                    device.javaClass.getMethod("createRfcommSocket", Int::class.java)
-                } else {
-                    device.javaClass.getMethod("createInsecureRfcommSocketToServiceRecord", UUID::class.java)
-                }
-                return method.invoke(device, Integer.valueOf(1)) as BluetoothSocket
-            } catch (e: NoSuchMethodException) {
-                e.printStackTrace()
-            } catch (e: InvocationTargetException) {
-                e.printStackTrace()
-            } catch (e: IllegalAccessException) {
-                e.printStackTrace()
-            }
-        }
-
-
-        return null
-    }
 
     private fun changeLedState(lighted: Boolean) {
         if (::espOutStream.isInitialized) {

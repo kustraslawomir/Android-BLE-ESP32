@@ -14,6 +14,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.fragment_splash.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import slawomir.kustra.ble.R
 import slawomir.kustra.ble.bluetooth.BluetoothScanner
 import slawomir.kustra.ble.model.ScanningResults
@@ -21,16 +25,18 @@ import slawomir.kustra.ble.ui.activity.MainActivity
 import slawomir.kustra.ble.ui.fragments.devicedetails.DeviceDetailsFragment
 import slawomir.kustra.ble.utils.Constants.Companion.DEVICE
 import slawomir.kustra.ble.utils.Constants.Companion.LAMP
+import timber.log.Timber
 
 class DeviceScannerFragment : Fragment() {
 
     lateinit var activity: MainActivity
+
+    private lateinit var scanner: BluetoothScanner
+
     private var lampDevice: BluetoothDevice? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_splash, container, false)
-
-    private lateinit var scanner: BluetoothScanner
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -48,13 +54,18 @@ class DeviceScannerFragment : Fragment() {
 
         scanner.initializeScanning()
 
-        val intent = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-        activity.registerReceiver(mPairReceiver, intent)
+        activity.registerReceiver(pairReceiver, IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED))
     }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         activity = context as MainActivity
+    }
+
+    override fun onDestroy() {
+        scanner.stopScanning()
+        activity.unregisterReceiver(pairReceiver)
+        super.onDestroy()
     }
 
     private fun mapDevicesList(
@@ -72,23 +83,24 @@ class DeviceScannerFragment : Fragment() {
         }
     }
 
-    override fun onDestroy() {
-        scanner.stopScanning()
-        super.onDestroy()
-    }
-
     private fun pairDevice(device: BluetoothDevice) {
+        Timber.e("pair device")
         if (scanner.shouldCreateNewPair())
             createBond(device)
         else openDeviceDetailsScreen(device)
     }
 
     private fun openDeviceDetailsScreen(device: BluetoothDevice) {
+        Timber.e("openDeviceDetailsScreen")
         val bundle = Bundle()
         bundle.putParcelable(DEVICE, device)
         val deviceDetailsFragment = DeviceDetailsFragment()
         deviceDetailsFragment.arguments = bundle
-        activity.replaceFragment(deviceDetailsFragment)
+
+        GlobalScope.launch(Dispatchers.IO) {
+            delay(1500)
+            activity.replaceFragment(deviceDetailsFragment)
+        }
     }
 
     private fun displayScanningState(scanning: ScanningResults) {
@@ -99,7 +111,7 @@ class DeviceScannerFragment : Fragment() {
         }
     }
 
-    private val mPairReceiver = object : BroadcastReceiver() {
+    private val pairReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
             if (BluetoothDevice.ACTION_BOND_STATE_CHANGED == action) {
