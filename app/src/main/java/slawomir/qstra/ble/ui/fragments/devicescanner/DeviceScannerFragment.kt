@@ -22,7 +22,7 @@ import timber.log.Timber
 
 class DeviceScannerFragment : Fragment() {
 
-    lateinit var activity: MainActivity
+    private lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_splash, container, false)
@@ -37,7 +37,13 @@ class DeviceScannerFragment : Fragment() {
                     BluetoothState.ScanningError -> showScanningError()
                     BluetoothState.Connected -> showConnectedUi()
                     BluetoothState.Connecting -> showConnectingUi()
+                    BluetoothState.ConnectingError -> showScanningError()
                 }
+            })
+
+        activity.bluetoothDeviceManager.getObservableBluetoothDevice()
+            .observe(this, Observer<BluetoothDevice> { connectedDevice ->
+                openDeviceDetailsScreen(connectedDevice)
             })
     }
 
