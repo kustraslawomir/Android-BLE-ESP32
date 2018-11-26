@@ -111,6 +111,11 @@ class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDevice
         Timber.e("onCharacteristicWrite: %s", BluetoothUtils.bytesToHex(characteristic?.value))
     }
 
+    override fun onCharacteristicRead(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int) {
+        super.onCharacteristicRead(gatt, characteristic, status)
+        Timber.e("onCharacteristicRead")
+    }
+
     private fun handleConnectionState(device: BluetoothDevice, newState: Int) {
         when (newState) {
             BluetoothProfile.STATE_CONNECTED -> {
@@ -164,12 +169,6 @@ class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDevice
 
     private fun getGattService(uuid: String): BluetoothGattService {
         val serviceUuid = UUID.fromString(uuid)
-        Timber.e(
-            "%s %s %s",
-            gattConnection == null,
-            serviceUuid == null,
-            gattConnection.getService(serviceUuid) == null
-        )
         return gattConnection.getService(serviceUuid)
     }
 }
