@@ -12,4 +12,5 @@ interface BluetoothDeviceManager {
     fun bluetoothEnable(): Boolean
     fun disconnectBluetoothGatt()
     fun closeBluetoothGatt()
+    fun send(checked: Boolean)
 }

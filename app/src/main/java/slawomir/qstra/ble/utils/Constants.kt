@@ -7,6 +7,7 @@ class Constants {
         const val LAMP = "ESP_LAMP"
         const val DEVICE = "device"
         const val ESP_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+        const val ESP_SERVICE_CHARACTERISTICS_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
         const val REQUEST_LOCATION_ACCESS = 1000
     }
 }
