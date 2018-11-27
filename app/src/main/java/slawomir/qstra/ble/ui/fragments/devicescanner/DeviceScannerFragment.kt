@@ -70,13 +70,13 @@ class DeviceScannerFragment : Fragment() {
         deviceDetailsFragment.arguments = bundle
 
         GlobalScope.launch(Dispatchers.IO) {
-            delay(1500)
+            delay(1000)
             activity.replaceFragment(deviceDetailsFragment)
         }
     }
 
     private fun showConnectingUi() {
-        scanningTextView.text = getString(R.string.connecting_error)
+        scanningTextView.text = getString(R.string.connecting)
     }
 
     private fun showConnectedUi() {

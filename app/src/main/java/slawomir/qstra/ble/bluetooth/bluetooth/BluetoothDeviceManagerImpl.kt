@@ -4,20 +4,23 @@ import android.bluetooth.*
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
+import android.os.Handler
 import androidx.lifecycle.MutableLiveData
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import slawomir.qstra.ble.bluetooth.bluetooth.BluetoothUtils.bytesToHex
-import slawomir.qstra.ble.bluetooth.bluetooth.BluetoothUtils.hexStringToByteArray
 import slawomir.qstra.ble.model.BluetoothState
-import slawomir.qstra.ble.utils.Constants
 import slawomir.qstra.ble.utils.Constants.Companion.ESP_SERVICE_CHARACTERISTICS_UUID
 import slawomir.qstra.ble.utils.Constants.Companion.ESP_UUID
 import slawomir.qstra.ble.utils.Constants.Companion.LAMP
 import timber.log.Timber
 import java.util.*
+import android.os.Looper
+import androidx.core.os.HandlerCompat.postDelayed
+
 
 class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDeviceManager, BluetoothGattCallback() {
 
@@ -43,17 +46,21 @@ class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDevice
             super.onScanResult(callbackType, result)
             if (result != null) {
                 Timber.e("onScanResult %s", Gson().toJson(result.device.name))
-                if (result.device.name == LAMP) {
+                if (result.device.name == LAMP && scanningState.value != BluetoothState.Connecting) {
                     stopScanning()
-                    connectToDevice(result.device)
+                    GlobalScope.launch(Dispatchers.Main) {
+                        delay(500)
+                        connectToDevice(result.device)
+                    }
                 }
             }
         }
     }
 
     private fun connectToDevice(device: BluetoothDevice) {
+        Timber.e("connecting...")
         scanningState.value = BluetoothState.Connecting
-        gattConnection = device.connectGatt(context, false, this)
+        gattConnection = device.connectGatt(context, true, this, BluetoothDevice.TRANSPORT_LE)
     }
 
     override fun startScanning() {
@@ -96,10 +103,25 @@ class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDevice
         if (status == BluetoothGatt.GATT_SUCCESS) {
             val mBluetoothGattService = gattConnection.getService(UUID.fromString(ESP_UUID))
             if (mBluetoothGattService != null)
-                Timber.e("Service characteristic UUID found: %s", mBluetoothGattService.uuid.toString())
+                Timber.e("onServicesDiscovered for uuid: %s", mBluetoothGattService.uuid.toString())
             else
-                Timber.e("Service characteristic not found for UUID: %s", ESP_UUID)
+                Timber.e("onServicesDiscovered -> unable to get service for uuid: %s", ESP_UUID)
         }
+    }
+
+    override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
+        super.onCharacteristicChanged(gatt, characteristic)
+        Timber.e("onCharacteristicChanged")
+    }
+
+    override fun onDescriptorWrite(gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int) {
+        super.onDescriptorWrite(gatt, descriptor, status)
+        Timber.e("onDescriptorWrite")
+    }
+
+    override fun onDescriptorRead(gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int) {
+        super.onDescriptorRead(gatt, descriptor, status)
+        Timber.e("onDescriptorRead")
     }
 
     override fun onCharacteristicWrite(
@@ -119,22 +141,24 @@ class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDevice
     private fun handleConnectionState(device: BluetoothDevice, newState: Int) {
         when (newState) {
             BluetoothProfile.STATE_CONNECTED -> {
+                Timber.e("STATE_CONNECTED")
                 gattConnection.discoverServices()
                 scanningState.value = BluetoothState.Connected
                 connectedDevice.value = device
             }
             BluetoothProfile.STATE_DISCONNECTED -> {
+                Timber.e("STATE_DISCONNECTED")
                 scanningState.value = BluetoothState.ConnectingError
             }
         }
     }
 
     override fun send(checked: Boolean) {
-        var value = "0"
+        var value = "1"
         if (checked)
             value = "1"
 
-        val action = serviceWriteAction(getGattService(ESP_UUID), ESP_SERVICE_CHARACTERISTICS_UUID, hexStringToByteArray(value))
+        val action = serviceWriteAction(getGattService(ESP_UUID), ESP_SERVICE_CHARACTERISTICS_UUID, value.toByteArray())
         commandQueue.add(action)
         execute(gattConnection)
     }
@@ -151,6 +175,7 @@ class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDevice
                 val characteristic = gattService.getCharacteristic(characteristicUuid)
                 return if (characteristic != null) {
                     characteristic.value = value
+                    Timber.e("writeCharacteristic %s", Gson().toJson(characteristic.value))
                     bluetoothGatt.writeCharacteristic(characteristic)
                     false
                 } else {
@@ -171,4 +196,6 @@ class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDevice
         val serviceUuid = UUID.fromString(uuid)
         return gattConnection.getService(serviceUuid)
     }
+
+
 }

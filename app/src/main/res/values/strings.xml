@@ -7,4 +7,5 @@
     <string name="light_led">Light led</string>
     <string name="connected">You are connected with device</string>
     <string name="connecting_error">There was and error while connecting to device</string>
+    <string name="connecting">Connecting...</string>
 </resources>
