@@ -154,7 +154,7 @@ class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDevice
     }
 
     override fun send(checked: Boolean) {
-        var value = "1"
+        var value = "0"
         if (checked)
             value = "1"
 
