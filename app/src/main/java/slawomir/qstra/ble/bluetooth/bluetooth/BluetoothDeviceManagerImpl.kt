@@ -13,18 +13,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import slawomir.qstra.ble.bluetooth.bluetooth.BluetoothUtils.bytesToHex
 import slawomir.qstra.ble.model.BluetoothState
-import slawomir.qstra.ble.utils.Constants.Companion.ESP_SERVICE_CHARACTERISTICS_UUID
-import slawomir.qstra.ble.utils.Constants.Companion.ESP_UUID
 import slawomir.qstra.ble.utils.Constants.Companion.LAMP
 import timber.log.Timber
 import java.util.*
-import android.os.Looper
-import androidx.core.os.HandlerCompat.postDelayed
-
 
 class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDeviceManager, BluetoothGattCallback() {
 
     private lateinit var gattConnection: BluetoothGatt
+
+     val ESP_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+     val ESP_SERVICE_CHARACTERISTICS_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
     private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     private val bluetoothAdapter = bluetoothManager.adapter
