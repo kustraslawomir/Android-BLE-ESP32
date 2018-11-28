@@ -4,7 +4,6 @@ import android.bluetooth.*
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
-import android.os.Handler
 import androidx.lifecycle.MutableLiveData
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -21,8 +20,8 @@ class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDevice
 
     private lateinit var gattConnection: BluetoothGatt
 
-     val ESP_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-     val ESP_SERVICE_CHARACTERISTICS_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+    val ESP_UUID = "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"
+    val ESP_SERVICE_CHARACTERISTICS_UUID = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 
     private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     private val bluetoothAdapter = bluetoothManager.adapter
@@ -192,6 +191,7 @@ class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDevice
     }
 
     private fun getGattService(uuid: String): BluetoothGattService {
+        Timber.e("get gatt service: %s", uuid)
         val serviceUuid = UUID.fromString(uuid)
         return gattConnection.getService(serviceUuid)
     }
