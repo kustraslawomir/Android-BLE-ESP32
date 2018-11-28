@@ -174,6 +174,7 @@ class BluetoothDeviceManagerImpl(private val context: Context) : BluetoothDevice
                     characteristic.value = value
                     Timber.e("writeCharacteristic %s", Gson().toJson(characteristic.value))
                     val write = bluetoothGatt.writeCharacteristic(characteristic)
+                    commandQueue.clear()
                     Timber.e("write returns: %s", write)
                     false
                 } else {

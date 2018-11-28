@@ -12,7 +12,7 @@ import slawomir.qstra.ble.ui.activity.MainActivity
 
 class DeviceDetailsFragment : Fragment() {
 
-    lateinit var activity: MainActivity
+    private lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_device_details, container, false)
